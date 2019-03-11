@@ -1,0 +1,289 @@
+/*
+Program Info
+Name: JUSTIN STRELKA
+CSC 161-Section: 001 Fa18
+Creation Date: 11/12/2018
+Program Name: BINTREE.CPP (BIRDAPP)
+Description: BINTREE CLASS DEFINITION (CONTAINER CLASS)
+Version: 11/18/2018
+Sources: C++ DATA STRUCTURES/ CPLUSPLUS.COM
+*/
+
+// NAMESPACE
+namespace strelka_bird_1
+{
+	//CONSTRUCTOR
+	template<class Type>
+	BinTree<Type>::BinTree()
+	{
+		root = nullptr;
+	}
+
+	//COPY CONTRUCTOR
+	template<class Type>
+    BinTree<Type>::BinTree(const BinTree<Type> & source)
+	{
+		root = nullptr;
+		if(source.root == nullptr)
+		{
+			return;
+		}
+		else
+		{
+			copyTree(source.root);
+		}
+	}
+
+	// ASSIGNMENT OPERATOR
+	template<class Type>
+	BinTree<Type>& BinTree<Type>::operator=(const BinTree<Type> & source)
+	{
+		if(this == & source)
+		{
+			return *this;
+		}
+		freeAllBinNodes(root);
+		root = nullptr;
+		copyTree(source.root);
+		return *this;
+	}
+
+	// DESTRUCTOR
+	template<class Type>
+	BinTree<Type>::~BinTree()
+	{
+		freeAllBinNodes(root); 
+		root = nullptr;
+	}
+
+	// ADD FUNCTION
+	template<class Type>
+	bool BinTree<Type>::add(Type dataIn)
+	{
+		BinNode<Type>* cursor = root;
+		BinNode<Type>* allocNode = allocBinNode(dataIn); // DYNAMIC ALLOCATION
+
+		if (root == nullptr) // CHECK FOR EMPTY TREE 
+		{
+			root = allocNode; // IF EMPTY INITIALIZE ROOT AS ALLOCNODE
+			treeCount++;
+			return true;
+		}
+		while (cursor != nullptr) // NOT EMPTY SO INITIATE WHILE LOOP
+		{
+			if (dataIn <= cursor->data)    // left <=
+			{
+				if (cursor->left == nullptr) // LEFT SIDE OPEN
+				{
+					cursor->left = allocNode;
+					cursor = nullptr;
+					treeCount++;
+				}
+				else // LEFT SIDE IS BUSY AND FULL
+					cursor = cursor->left;
+			}
+			else                        // right >
+			{
+				if (cursor->right == nullptr) // RIGHT SIDE IS OPEN
+				{
+					cursor->right = allocNode;
+					cursor = nullptr;
+					treeCount++;
+				}
+				else // RIGHT SIDE IS BUSY AND FULL
+					cursor = cursor->right;
+			}
+		}
+	}
+
+	// REMOVE FUNCTION (PUBLIC, NON-RECURSIVE)
+	template<class Type>
+	bool BinTree<Type>::remove(Type& dataIn)
+	{
+		remove(root, dataIn);
+		return true;
+	}
+
+	// PRINT FUNCTION (PUBLIC, NON-RECURSIVE)
+	template<class Type>
+	void BinTree<Type>::printAll()
+	{
+		inOrderTraverse(print);
+	}
+
+	// INORDERTRAVERSE FUNCTION(PUBLIC, NON-RECURSIVE)
+	template<class Type>
+	void BinTree<Type>::inOrderTraverse(void process(Type& , int))
+	{
+		int counter = 1;
+		inOrderTraverse(root, counter, process);
+	}
+
+	// READ FROM COMMA DELIMITED FILE
+	template<class Type>
+	bool BinTree<Type>::readFile(std::string fileName)
+	{
+		std::ifstream inFile;
+		inFile.open(fileName);
+		// CHECK FILE OPEN
+		if (!inFile)
+		{
+			return false;
+		}
+		else if (inFile)
+		{
+			Type tmp;
+			inFile >> tmp;
+			while (!inFile.eof())
+			{
+				add(tmp);
+				inFile >> tmp;
+			}
+		}
+		// CLOSE FILE AFTER EOF IS FOUND
+		inFile.close();
+		return true;
+	}
+
+	// WRITE TO COMMA DELIMITED FILE
+	template <class Type>
+	bool BinTree<Type>::writeFile(std::string fileName, char delimiter)
+	{
+		// CREATE FILE OFSTREAM
+		std::ofstream outFile;
+		// OPEN OUTFILE FOR WRITING
+		outFile.open(fileName);
+		// CHECK IF FILE OPENED SUCCESS
+		if (!outFile)
+		{
+			return false;
+		}
+		// IF SUCCESS WRITE BINTREE NODES TO FILE
+		else if (outFile)
+		{
+			writeFile(root, outFile, delimiter);
+		}
+		// CLOSE OUTFILE
+		outFile.close();
+		return true;
+	}
+
+	// WRITEFILE (PRIVATE, REUCRSIVE)
+	template<class Type>
+	void BinTree<Type>::writeFile(BinNode<Type>* cursor, std::ofstream& outFile, char delimiter)
+	{
+		if(cursor != nullptr)
+		{
+			outFile << (*cursor).data << delimiter;
+			writeFile(cursor->left, outFile, delimiter);
+			writeFile(cursor->right, outFile, delimiter);
+		}
+	}
+
+	// ALLOCATE NEW BINNODE POINTER
+	template<class Type>
+	BinNode<Type>* BinTree<Type>::allocBinNode(Type dataIn)
+	{
+		return new BinNode<Type>(dataIn);
+	}
+
+	// COPYTREE (PRIVATE, RECURSIVE)
+	template<class Type>
+	void BinTree<Type>::copyTree(const BinNode<Type>*
+	source)
+	{
+		if(source != nullptr)
+		{
+			add(source->data);
+			copyTree(source->left);		
+			copyTree(source->right);
+		}
+	}
+
+	// FREE BIN NODE FUNCTION (PRIVATE, RECURSIVE)
+	template<class Type>
+	void BinTree<Type>::freeAllBinNodes(BinNode<Type>* cursor)
+	{
+		if (cursor != nullptr)  // Post-Order Traverse - stopping case
+		{
+			freeAllBinNodes(cursor->left);
+			freeAllBinNodes(cursor->right);
+			delete cursor;
+			treeCount--;
+		}
+	}
+
+	// IN ORDER TRAVERSE OF TREE (PRIVATE, RECURSIVE)
+	template<class Type>
+	void BinTree<Type>::inOrderTraverse(BinNode<Type> * rootPtr, int & counter, void process(Type&, int))
+	{
+		if(rootPtr != nullptr)
+		{
+			inOrderTraverse(rootPtr->left, counter, process);
+			process(rootPtr->data, counter);
+			counter++;
+			inOrderTraverse(rootPtr->right, counter, process);
+		}
+	}
+
+	// FIND MINIMUM NODE VALUE (PRIVATE, NON-RECURSIVE)
+	template<class Type>
+	BinNode<Type>* BinTree<Type>::minValueNode(BinNode<Type>*& node)
+	{
+		BinNode<Type>* current = node;
+
+		while (current->left != NULL)
+		{
+			current = current->left;
+		}
+		return current;
+	}
+
+	// REMOVE DATA FROM BINTREE (PRIVATE, RECURSIVE)
+	template<class Type>
+	BinNode<Type>* BinTree<Type>::remove(BinNode<Type>*& root, Type& dataIn)
+	{
+		BinNode<Type>* temp;
+		if(root == NULL)
+		{
+			return root;
+		}
+		if(dataIn == root->data)
+		{
+			if(root->left == NULL)
+			{
+				temp = root->right;
+				free(root);
+				treeCount--;
+				return temp;
+			}
+			else if(root->right == NULL)
+			{
+				temp = root->left;
+				free(root);
+				treeCount--;
+				return temp;
+			}
+			temp = minValueNode(root->right);
+			root->data = temp->data;
+			root->right = remove(root->right, temp->data);
+		}
+		else if(dataIn < root->data)
+		{
+			root->left = remove(root->left, dataIn);
+		}
+		else
+		{
+			root->right = remove(root->right, dataIn);
+		}
+		return root;
+	}
+
+	// STANDALONE PRINT FUNCTION. CALLED WITH INORDERTRAVERSE TO PRINT CONTENTS OF BINTREE
+	template<class Type>
+	void print(Type & cursor, int counter)
+	{
+		std::cout << "Index: " << counter << std::endl;
+		std::cout << cursor << std::endl;
+	}
+}

@@ -1,0 +1,32 @@
+/*
+Program Info
+Name: JUSTIN STRELKA
+CSC 161-Section: 001 Fa18
+Creation Date: 11/12/2018
+Program Name: BINNODE.CPP (BIRDAPP)
+Description: BINNODE CLASS DEFINITION (BINTREE HELPER CLASS)
+Version: 11/18/2018
+Sources: C++ DATA STRUCTURES/ CPLUSPLUS.COM
+*/
+
+// NAMESPACE
+namespace strelka_bird_1
+{
+	//DECLARE TEMPLATE FUNC
+	template <class Type>
+	// DEFAULT CONSTRUCTOR
+	BinNode<Type>::BinNode()
+	{
+		// SET PRIVATE MEMBER VARIABLES (POINTERS) TO NULLPTR
+		left = right = nullptr;
+	}
+
+	template <class Type>
+	// OTHER CONSTRUCTOR
+	BinNode<Type>::BinNode(Type dataIn)
+	{
+		// SET PRIVATE MEMBER VARIABLES (POINTERS) TO NULLPTR
+		left = right = nullptr;
+		data = dataIn;
+	}
+}
